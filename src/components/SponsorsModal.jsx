@@ -120,7 +120,7 @@ export default function SponsorsModal({ isOpen, onClose }) {
 
               <div className="mt-6">
                 <a
-                  href="https://github.com/sponsors"
+                  href="https://github.com/sponsors/Yaromir-Anokhin"
                   target="_blank"
                   rel="noreferrer"
                   className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm transition-all ${t.btnColor}`}

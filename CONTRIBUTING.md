@@ -10,7 +10,7 @@ MCP Studio is an open-source visual DevTools platform for Anthropic's Model Cont
 
 1. Fork and clone the repository:
    ```bash
-   git clone https://github.com/<your-username>/mcp-studio.git
+   git clone https://github.com/Yaromir-Anokhin/mcp-studio.git
    cd mcp-studio
    ```
 

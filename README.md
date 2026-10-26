@@ -93,7 +93,7 @@ The **Model Context Protocol (MCP)** is revolutionizing how AI models interact w
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/mcp-studio.git
+git clone https://github.com/Yaromir-Anokhin/mcp-studio.git
 cd mcp-studio
 
 # 2. Install dependencies
@@ -142,7 +142,7 @@ If MCP Studio saves you hours of debugging or powers your company's AI stack, co
 | **🚀 Pro Developer** | `$15 / mo` | Early access to native Desktop binary builds (Tauri v2), priority roadmap requests, custom server templates. |
 | **🏢 Company / Startup** | `$50 / mo` | **Company Logo + Link** prominently featured at top of `README.md` and inside the app, private Slack/Discord technical advisory. |
 
-👉 **[Sponsor on GitHub Sponsors](https://github.com/sponsors)** • **[Support via Buy Me a Coffee](https://buymeacoffee.com)**
+👉 **[Sponsor on GitHub Sponsors](https://github.com/sponsors/Yaromir-Anokhin)** • **[Support via Buy Me a Coffee](https://buymeacoffee.com)**
 
 ---
 

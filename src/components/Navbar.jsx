@@ -111,7 +111,7 @@ export default function Navbar({
 
         {/* GitHub Stars Button */}
         <a
-          href="https://github.com"
+          href="https://github.com/Yaromir-Anokhin/mcp-studio"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 border border-white/10 hover:border-white/20 transition-all"
