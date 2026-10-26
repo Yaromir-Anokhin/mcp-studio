@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mcp-studio:
+    build: .
+    container_name: mcp_studio
+    restart: always
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    volumes:
+      - ./server/mcp_servers.json:/app/server/mcp_servers.json

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "builtin-system",
+    "name": "System Diagnostics MCP",
+    "type": "builtin",
+    "builtinKey": "builtin-system",
+    "command": "builtin",
+    "args": [],
+    "env": {}
+  },
+  {
+    "id": "builtin-filesystem",
+    "name": "Filesystem Safe Explorer",
+    "type": "builtin",
+    "builtinKey": "builtin-filesystem",
+    "command": "builtin",
+    "args": [],
+    "env": {}
+  },
+  {
+    "id": "builtin-web",
+    "name": "Web & Search Simulator",
+    "type": "builtin",
+    "builtinKey": "builtin-web",
+    "command": "builtin",
+    "args": [],
+    "env": {}
+  },
+  {
+    "id": "stdio-custom-sqlite",
+    "name": "SQLite Local MCP Server",
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-sqlite",
+      "--db-path",
+      "workspace.db"
+    ],
+    "env": {}
+  }
+]
