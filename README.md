@@ -1,5 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MCP-Specification%20Compliant-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" alt="MCP Compliant" />
+  <a href="https://m8ven.ai/mcp/yaromir-anokhin/mcp-studio?s=readme"><img src="https://m8ven.ai/badge/mcp/yaromir-anokhin/mcp-studio?variant=verified" alt="M8ven Verified" /></a>
   <img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="License MIT" />
   <img src="https://img.shields.io/badge/PRs-Welcome-cyan?style=for-the-badge" alt="PRs Welcome" />
   <img src="https://img.shields.io/badge/GitHub%20Sponsors-Supported-pink?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors" />
@@ -10,6 +11,12 @@
 <p align="center">
   <strong>The Visual Postman & DevTools Suite for Anthropic's Model Context Protocol (MCP)</strong><br />
   Inspect tools, test JSON-RPC in real time, debug stdio servers, and 1-click sync with Claude Desktop and Cursor.
+</p>
+
+<p align="center">
+  <a href="https://m8ven.ai/mcp/yaromir-anokhin/mcp-studio?s=readme">
+    <img src="https://m8ven.ai/badge/mcp/yaromir-anokhin/mcp-studio?variant=verified" alt="M8ven Verified" />
+  </a>
 </p>
 
 <p align="center">

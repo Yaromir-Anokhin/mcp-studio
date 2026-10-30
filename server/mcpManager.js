@@ -227,7 +227,16 @@ class MCPManager {
       if (builtin) {
         server.status = 'running';
         server.uptimeStart = Date.now();
-        server.tools = builtin.tools.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
+        server.tools = builtin.tools.map(t => ({
+          name: t.name,
+          description: t.description,
+          inputSchema: t.inputSchema,
+          readOnlyHint: t.readOnlyHint,
+          destructiveHint: t.destructiveHint,
+          idempotentHint: t.idempotentHint,
+          openWorldHint: t.openWorldHint,
+          annotations: t.annotations
+        }));
         server.resources = builtin.resources;
         server.prompts = builtin.prompts;
         this.appendLog(id, 'info', `Built-in server initialized with ${server.tools.length} tools.`);
@@ -245,9 +254,15 @@ class MCPManager {
     this.appendLog(id, 'info', `Spawning process: ${server.command} ${server.args.join(' ')}`);
 
     try {
-      const child = spawn(server.command, server.args, {
+      const isWindows = process.platform === 'win32';
+      let cmd = server.command;
+      if (isWindows && (cmd === 'npx' || cmd === 'npm' || cmd === 'uvx')) {
+        cmd = `${cmd}.cmd`;
+      }
+
+      const child = spawn(cmd, server.args, {
         env: { ...process.env, ...server.env },
-        shell: true
+        shell: false
       });
 
       this.processes.set(id, child);
@@ -385,7 +400,18 @@ class MCPManager {
           serverInfo: { name: builtin.name, version: builtin.version }
         };
       } else if (method === 'tools/list') {
-        result = { tools: builtin.tools.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })) };
+        result = {
+          tools: builtin.tools.map(t => ({
+            name: t.name,
+            description: t.description,
+            inputSchema: t.inputSchema,
+            readOnlyHint: t.readOnlyHint,
+            destructiveHint: t.destructiveHint,
+            idempotentHint: t.idempotentHint,
+            openWorldHint: t.openWorldHint,
+            annotations: t.annotations
+          }))
+        };
       } else if (method === 'resources/list') {
         result = { resources: builtin.resources };
       } else if (method === 'prompts/list') {

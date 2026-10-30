@@ -16,6 +16,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'get_system_specs',
         description: 'Returns hardware architecture, OS platform, CPU cores, uptime, and system release information.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false
+        },
         inputSchema: {
           type: 'object',
           properties: {
@@ -40,6 +50,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'get_memory_usage',
         description: 'Returns current memory allocation, heap statistics, and process usage in MB.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: false
+        },
         inputSchema: {
           type: 'object',
           properties: {}
@@ -58,6 +78,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'ping_service',
         description: 'Checks connectivity and measures round-trip latency to a given host or IP.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: true
+        },
         inputSchema: {
           type: 'object',
           required: ['host'],
@@ -107,6 +137,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'list_directory',
         description: 'Lists files and folders inside a specified workspace directory.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false
+        },
         inputSchema: {
           type: 'object',
           required: ['directoryPath'],
@@ -135,6 +175,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'read_file_head',
         description: 'Reads the first N lines of a file safely with size limit protections.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false
+        },
         inputSchema: {
           type: 'object',
           required: ['filePath'],
@@ -180,6 +230,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'fetch_markdown',
         description: 'Simulates extracting clean reader-mode Markdown and metadata from a web URL.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true
+        },
         inputSchema: {
           type: 'object',
           required: ['url'],
@@ -201,6 +261,16 @@ export const BUILTIN_SERVERS = {
       {
         name: 'search_knowledge',
         description: 'Searches developer docs, MCP server registry, and web results for a given query.',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true
+        },
         inputSchema: {
           type: 'object',
           required: ['query'],
