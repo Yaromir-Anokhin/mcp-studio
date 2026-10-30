@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MCP-Specification%20Compliant-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" alt="MCP Compliant" />
-  <a href="https://m8ven.ai/mcp/yaromir-anokhin/mcp-studio?s=readme"><img src="https://m8ven.ai/badge/mcp/yaromir-anokhin/mcp-studio?variant=verified" alt="M8ven Verified" /></a>
+  <a href="https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme"><img src="https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612" alt="M8ven Verified" /></a>
   <img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="License MIT" />
   <img src="https://img.shields.io/badge/PRs-Welcome-cyan?style=for-the-badge" alt="PRs Welcome" />
   <img src="https://img.shields.io/badge/GitHub%20Sponsors-Supported-pink?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors" />
@@ -14,10 +14,11 @@
 </p>
 
 <p align="center">
-  <a href="https://m8ven.ai/mcp/yaromir-anokhin/mcp-studio?s=readme">
-    <img src="https://m8ven.ai/badge/mcp/yaromir-anokhin/mcp-studio?variant=verified" alt="M8ven Verified" />
-  </a>
+  <a href="https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme"><img src="https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612" alt="M8ven Verified" /></a>
 </p>
+
+[![M8ven Verified](https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612)](https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme)
+
 
 <p align="center">
   <a href="#-quick-start">Quick Start</a> •
