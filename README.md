@@ -190,3 +190,5 @@ Contributions are warmly welcomed! Please read our [CONTRIBUTING.md](CONTRIBUTIN
 ## 📄 License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
+[![M8ven Verified](https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612)](https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme)
+
