@@ -19,9 +19,7 @@
     "ollama",
     "llm-agent"
   ],
-  "bin": {
-    "mcp-studio": "./bin/mcp-studio.js"
-  },
+  "bin": "./bin/mcp-studio.js",
   "files": [
     "bin",
     "server",

@@ -221,7 +221,8 @@ app.post('/api/agent/chat', async (req, res) => {
 const distPath = path.resolve(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res, next) => {
+  app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
     if (req.path.startsWith('/api') || req.path.startsWith('/ws')) return next();
     res.sendFile(path.join(distPath, 'index.html'));
   });
