@@ -71,7 +71,18 @@ The **Model Context Protocol (MCP)** is revolutionizing how AI models interact w
   - `Filesystem`, `GitHub`, `PostgreSQL`, `SQLite`, `Brave Search`, `Fetch`, `Memory Graph`, `Docker`, `Puppeteer`, and more.
 - Guided environment variable setup (API keys, connection strings).
 
-### 6. 📦 Zero-Dependency Built-in Servers
+### 6. 🌐 Remote Cloud SSE & HTTP Transport
+- Full support for cloud-hosted MCP servers via **Server-Sent Events (SSE)**.
+- Auto-discovers POST endpoints, handles auth Bearer tokens, and transparently bridges remote RPC packets.
+- Test servers running in Docker, Fly.io, Cloudflare, or remote microservices without installing local CLI binaries.
+
+### 7. 🧪 Postman-style Test Suites & Assertions
+- Save tool calls into persistent **Test Scenarios and Suites**.
+- Define assertions: **Latency thresholds (ms)**, **status checks**, and **response substring / JSON schema matches**.
+- 1-click **Run Suite** with real-time pass/fail scorecards and latency metrics.
+- Export test suites as JSON and generate ready-to-use **GitHub Actions CI/CD workflows**.
+
+### 8. 📦 Zero-Dependency Built-in Servers
 - Ships with pre-loaded mock servers (`System Diagnostics`, `Filesystem Safe Explorer`, `Web & Search Simulator`).
 - Test tool schemas immediately without installing external npm or python packages!
 
@@ -82,12 +93,13 @@ The **Model Context Protocol (MCP)** is revolutionizing how AI models interact w
 | Feature | Manual JSON Editing | Official CLI Inspector | ⚡ MCP Studio |
 | :--- | :---: | :---: | :---: |
 | **Visual Form from Schema** | ❌ None | ⚠️ Basic HTML | ✅ Rich Form + Raw JSON |
+| **Remote Cloud SSE Transport** | ❌ None | ⚠️ Limited | ✅ Full SSE + Stream Inspector |
+| **Test Suites & Assertions** | ❌ None | ❌ None | ✅ Postman-style Runner + CI/CD |
 | **Live JSON-RPC Monitor** | ❌ None | ⚠️ Console text | ✅ Filterable Traffic Grid + Latency |
 | **Claude & Cursor 1-Click Sync** | ❌ Manual copy-paste | ❌ None | ✅ Auto-detect + Safe Backup |
 | **AI Agent Tool Calling Loop** | ❌ None | ❌ None | ✅ Built-in Trace Simulator |
 | **Curated 1-Click Store** | ❌ None | ❌ None | ✅ 20+ Preconfigured Servers |
-| **Process Logs (stdout/stderr)** | ❌ None | ⚠️ Terminal only | ✅ Filterable IDE Console |
-| **Cross-Platform (Win/Mac/Linux)** | ⚠️ Manual | ⚠️ Manual CLI | ✅ Instant GUI |
+| **1-Click Launch (npx)** | ❌ None | ⚠️ Needs flags | ✅ `npx mcp-studio` |
 
 ---
 
@@ -97,7 +109,16 @@ The **Model Context Protocol (MCP)** is revolutionizing how AI models interact w
 - Node.js 18+ (tested on Node v20 / v22)
 - npm or yarn or pnpm
 
-### Launch in 30 Seconds
+### Launch Instantly via NPX (Zero Clone)
+
+```bash
+npx mcp-studio
+```
+*Opens MCP Studio directly in your default browser!*
+
+---
+
+### Or Run from Source (Development)
 
 ```bash
 # 1. Clone the repository

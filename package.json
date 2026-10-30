@@ -19,6 +19,16 @@
     "ollama",
     "llm-agent"
   ],
+  "bin": {
+    "mcp-studio": "./bin/mcp-studio.js"
+  },
+  "files": [
+    "bin",
+    "server",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",

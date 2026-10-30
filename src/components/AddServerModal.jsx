@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { X, Plus, Terminal, Settings, Layers, Play } from 'lucide-react';
+import { X, Plus, Terminal, Globe, Shield, Layers } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function AddServerModal({ isOpen, onClose, onCreated }) {
+  const [transportType, setTransportType] = useState('stdio'); // 'stdio' | 'sse'
   const [name, setName] = useState('');
+  
+  // stdio fields
   const [command, setCommand] = useState('npx');
   const [argsText, setArgsText] = useState('-y @modelcontextprotocol/server-filesystem .');
   const [envJson, setEnvJson] = useState('{}');
+  
+  // sse fields
+  const [sseUrl, setSseUrl] = useState('http://localhost:8000/sse');
+  const [authToken, setAuthToken] = useState('');
+  const [headersJson, setHeadersJson] = useState('{}');
+
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -16,23 +25,48 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    let parsedEnv = {};
     try {
-      parsedEnv = JSON.parse(envJson || '{}');
-    } catch {
-      alert('Invalid JSON in Environment Variables field');
-      setIsSubmitting(false);
-      return;
-    }
+      if (transportType === 'stdio') {
+        let parsedEnv = {};
+        try {
+          parsedEnv = JSON.parse(envJson || '{}');
+        } catch {
+          alert('Invalid JSON in Environment Variables field');
+          setIsSubmitting(false);
+          return;
+        }
 
-    try {
-      await api.addServer({
-        name: name || 'Custom MCP Server',
-        command: command.trim(),
-        args: argsText.trim().split(' ').filter(Boolean),
-        env: parsedEnv,
-        description
-      });
+        await api.addServer({
+          name: name || 'Custom Stdio MCP Server',
+          type: 'stdio',
+          command: command.trim(),
+          args: argsText.trim().split(' ').filter(Boolean),
+          env: parsedEnv,
+          description
+        });
+      } else {
+        let parsedHeaders = {};
+        try {
+          parsedHeaders = JSON.parse(headersJson || '{}');
+        } catch {
+          alert('Invalid JSON in Custom Headers field');
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (authToken.trim()) {
+          parsedHeaders['Authorization'] = `Bearer ${authToken.trim()}`;
+        }
+
+        await api.addServer({
+          name: name || 'Remote SSE MCP Server',
+          type: 'sse',
+          url: sseUrl.trim(),
+          headers: parsedHeaders,
+          description
+        });
+      }
+
       if (onCreated) onCreated();
       onClose();
     } catch (err) {
@@ -42,10 +76,17 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
     }
   };
 
-  const applyTemplate = (tplName, tplCmd, tplArgs) => {
+  const applyStdioTemplate = (tplName, tplCmd, tplArgs) => {
+    setTransportType('stdio');
     setName(tplName);
     setCommand(tplCmd);
     setArgsText(tplArgs);
+  };
+
+  const applySseTemplate = (tplName, tplUrl) => {
+    setTransportType('sse');
+    setName(tplName);
+    setSseUrl(tplUrl);
   };
 
   return (
@@ -58,8 +99,8 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">Add Custom MCP Server</h2>
-              <p className="text-xs text-slate-400">Launch any local CLI process via stdio JSON-RPC</p>
+              <h2 className="text-sm font-bold text-white">Add MCP Server</h2>
+              <p className="text-xs text-slate-400">Connect local stdio process or remote cloud SSE stream</p>
             </div>
           </div>
           <button
@@ -70,30 +111,87 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
           </button>
         </div>
 
+        {/* Transport Type Selector Tabs */}
+        <div className="px-6 pt-3 pb-2 bg-slate-950/80 border-b border-white/5 flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setTransportType('stdio')}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-2 border transition-all ${
+              transportType === 'stdio'
+                ? 'bg-purple-600/20 border-purple-500/50 text-white shadow-sm'
+                : 'bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            }`}
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span>Local Process (stdio)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTransportType('sse')}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-2 border transition-all ${
+              transportType === 'sse'
+                ? 'bg-cyan-600/20 border-cyan-500/50 text-white shadow-sm'
+                : 'bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Remote Cloud (SSE / HTTP)</span>
+          </button>
+        </div>
+
         {/* Templates */}
-        <div className="px-6 pt-4 pb-2 border-b border-white/5 bg-[#090c15] flex items-center space-x-2 overflow-x-auto text-[11px]">
+        <div className="px-6 pt-2.5 pb-2 border-b border-white/5 bg-[#090c15] flex items-center space-x-2 overflow-x-auto text-[11px]">
           <span className="text-slate-400 font-semibold uppercase text-[10px] shrink-0">Presets:</span>
-          <button
-            type="button"
-            onClick={() => applyTemplate('Local Filesystem MCP', 'npx', '-y @modelcontextprotocol/server-filesystem .')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
-          >
-            Filesystem (npx)
-          </button>
-          <button
-            type="button"
-            onClick={() => applyTemplate('Python FastMCP Server', 'uv', 'run server.py')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
-          >
-            Python (uv run)
-          </button>
-          <button
-            type="button"
-            onClick={() => applyTemplate('Node Custom Server', 'node', './mcp-server.js')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
-          >
-            Node.js
-          </button>
+          {transportType === 'stdio' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => applyStdioTemplate('Local Filesystem MCP', 'npx', '-y @modelcontextprotocol/server-filesystem .')}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Filesystem (npx)
+              </button>
+              <button
+                type="button"
+                onClick={() => applyStdioTemplate('Python FastMCP Server', 'uv', 'run server.py')}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Python (uv run)
+              </button>
+              <button
+                type="button"
+                onClick={() => applyStdioTemplate('Node Custom Server', 'node', './mcp-server.js')}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Node.js
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => applySseTemplate('Local FastMCP SSE', 'http://localhost:8000/sse')}
+                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Local SSE (localhost:8000)
+              </button>
+              <button
+                type="button"
+                onClick={() => applySseTemplate('Cloud Remote MCP', 'https://api.example.com/mcp/sse')}
+                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Cloud Remote SSE
+              </button>
+              <button
+                type="button"
+                onClick={() => applySseTemplate('Docker Container SSE', 'http://localhost:3005/sse')}
+                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-2 py-1 rounded transition-colors whitespace-nowrap"
+              >
+                Docker Container
+              </button>
+            </>
+          )}
         </div>
 
         {/* Form */}
@@ -102,7 +200,7 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
             <label className="block text-slate-300 font-medium mb-1">Server Display Name:</label>
             <input
               type="text"
-              placeholder="e.g. My Custom Tools MCP"
+              placeholder={transportType === 'stdio' ? 'e.g. My Custom Tools MCP' : 'e.g. Production Cloud MCP'}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-slate-950 text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
@@ -110,40 +208,84 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="col-span-1">
-              <label className="block text-slate-300 font-medium mb-1">Command:</label>
-              <input
-                type="text"
-                placeholder="npx / uv / node"
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                className="w-full bg-slate-950 font-mono text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
-                required
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-slate-300 font-medium mb-1">Arguments:</label>
-              <input
-                type="text"
-                placeholder="args separated by spaces..."
-                value={argsText}
-                onChange={(e) => setArgsText(e.target.value)}
-                className="w-full bg-slate-950 font-mono text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
-              />
-            </div>
-          </div>
+          {transportType === 'stdio' ? (
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-1">
+                  <label className="block text-slate-300 font-medium mb-1">Command:</label>
+                  <input
+                    type="text"
+                    placeholder="npx / uv / node"
+                    value={command}
+                    onChange={(e) => setCommand(e.target.value)}
+                    className="w-full bg-slate-950 font-mono text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-slate-300 font-medium mb-1">Arguments:</label>
+                  <input
+                    type="text"
+                    placeholder="args separated by spaces..."
+                    value={argsText}
+                    onChange={(e) => setArgsText(e.target.value)}
+                    className="w-full bg-slate-950 font-mono text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-slate-300 font-medium mb-1">Environment Variables (JSON):</label>
-            <textarea
-              rows={3}
-              value={envJson}
-              onChange={(e) => setEnvJson(e.target.value)}
-              placeholder='{ "API_KEY": "secret" }'
-              className="w-full bg-slate-950 font-mono text-[11px] text-purple-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none resize-none"
-            />
-          </div>
+              <div>
+                <label className="block text-slate-300 font-medium mb-1">Environment Variables (JSON):</label>
+                <textarea
+                  rows={2}
+                  value={envJson}
+                  onChange={(e) => setEnvJson(e.target.value)}
+                  placeholder='{ "API_KEY": "secret" }'
+                  className="w-full bg-slate-950 font-mono text-[11px] text-purple-200 px-3 py-2 rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none resize-none"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="block text-slate-300 font-medium mb-1">SSE Stream Endpoint URL:</label>
+                <input
+                  type="url"
+                  placeholder="https://your-domain.com/sse or http://localhost:8000/sse"
+                  value={sseUrl}
+                  onChange={(e) => setSseUrl(e.target.value)}
+                  className="w-full bg-slate-950 font-mono text-cyan-300 px-3 py-2 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                  required
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  MCP Studio will open the SSE stream and auto-discover the POST messages endpoint.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1">Bearer Token (Optional):</label>
+                  <input
+                    type="password"
+                    placeholder="eyJhbGciOi..."
+                    value={authToken}
+                    onChange={(e) => setAuthToken(e.target.value)}
+                    className="w-full bg-slate-950 text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1">Custom Headers (JSON):</label>
+                  <input
+                    type="text"
+                    placeholder='{"X-Custom": "val"}'
+                    value={headersJson}
+                    onChange={(e) => setHeadersJson(e.target.value)}
+                    className="w-full bg-slate-950 font-mono text-[11px] text-slate-200 px-3 py-2 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <label className="block text-slate-300 font-medium mb-1">Description (Optional):</label>
@@ -167,9 +309,13 @@ export default function AddServerModal({ isOpen, onClose, onCreated }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold shadow-md shadow-purple-500/20 transition-all"
+              className={`px-5 py-2 rounded-lg text-white font-semibold shadow-md transition-all ${
+                transportType === 'sse'
+                  ? 'bg-cyan-600 hover:bg-cyan-500 shadow-cyan-500/20'
+                  : 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/20'
+              }`}
             >
-              {isSubmitting ? 'Adding...' : 'Add Server'}
+              {isSubmitting ? 'Connecting...' : (transportType === 'sse' ? 'Connect SSE Server' : 'Add Server')}
             </button>
           </div>
         </form>

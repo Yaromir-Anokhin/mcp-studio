@@ -13,13 +13,15 @@ import {
   AlertTriangle,
   History,
   FileJson,
-  Layers
+  Layers,
+  CheckSquare
 } from 'lucide-react';
 
 export default function ToolRunner({
   server,
   onCallTool,
-  isLoading
+  isLoading,
+  onSaveToSuite
 }) {
   const tools = server?.tools || [];
   const [selectedToolName, setSelectedToolName] = useState(tools[0]?.name || '');
@@ -234,6 +236,33 @@ export default function ToolRunner({
                     <span>Raw JSON</span>
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    let args = formValues;
+                    if (mode === 'json') {
+                      try { args = JSON.parse(jsonText); } catch {}
+                    }
+                    if (onSaveToSuite && currentTool) {
+                      onSaveToSuite({
+                        id: `sc-${Date.now()}`,
+                        name: `Test: ${currentTool.name} (${new Date().toLocaleTimeString()})`,
+                        toolName: currentTool.name,
+                        args,
+                        maxLatencyMs: 800,
+                        mustContain: '',
+                        expectError: false,
+                        lastResult: null
+                      });
+                    }
+                  }}
+                  title="Save request to Test Suite"
+                  className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-white/10 transition-colors"
+                >
+                  <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="hidden sm:inline">Save as Test</span>
+                </button>
 
                 <button
                   onClick={handleExecute}

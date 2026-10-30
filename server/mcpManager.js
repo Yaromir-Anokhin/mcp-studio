@@ -14,6 +14,7 @@ class MCPManager {
     this.wsClients = new Set();
     this.reqIdCounter = 1;
     this.pendingRequests = new Map(); // reqId -> { resolve, reject, timer, serverId, method }
+    this.sseConnections = new Map(); // serverId -> { controller, postUrl, sseUrl }
 
     this.loadPersistedServers();
   }
@@ -169,6 +170,8 @@ class MCPManager {
         command: s.command,
         args: s.args,
         env: s.env,
+        url: s.url,
+        headers: s.headers,
         description: s.description
       }));
       fs.writeFileSync(CONFIG_FILE, JSON.stringify(list, null, 2), 'utf-8');
@@ -190,16 +193,18 @@ class MCPManager {
     return this.servers.get(id);
   }
 
-  addServer({ name, type = 'stdio', command = 'npx', args = [], env = {}, description = '' }) {
+  addServer({ name, type = 'stdio', command = 'npx', args = [], env = {}, url = '', headers = {}, description = '' }) {
     const id = `srv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newServer = {
       id,
-      name: name || 'New MCP Server',
+      name: name || (type === 'sse' ? 'Remote SSE MCP Server' : 'New MCP Server'),
       type,
-      command,
-      args: Array.isArray(args) ? args : args.split(' ').filter(Boolean),
+      command: command || '',
+      args: Array.isArray(args) ? args : (args ? args.split(' ').filter(Boolean) : []),
       env: env || {},
-      description,
+      url: url || '',
+      headers: headers || {},
+      description: description || '',
       status: 'stopped',
       tools: [],
       resources: [],
@@ -207,7 +212,7 @@ class MCPManager {
     };
     this.servers.set(id, newServer);
     this.savePersistedServers();
-    this.appendLog(id, 'info', `Server added to MCP Studio configuration.`);
+    this.appendLog(id, 'info', `Server (${type}) added to MCP Studio configuration.`);
     return newServer;
   }
 
@@ -243,6 +248,18 @@ class MCPManager {
         this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'running', server });
         return server;
       }
+    }
+
+    if (server.type === 'sse') {
+      if (server.status === 'running') return server;
+      server.status = 'starting';
+      this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'starting' });
+      this.appendLog(id, 'info', `Connecting to remote SSE stream: ${server.url}`);
+
+      const controller = new AbortController();
+      this.sseConnections.set(id, { controller, postUrl: null, sseUrl: server.url });
+      this.connectSse(id, server, controller);
+      return server;
     }
 
     if (server.status === 'running') {
@@ -347,6 +364,18 @@ class MCPManager {
       server.status = 'stopped';
       this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'stopped' });
       this.appendLog(id, 'info', 'Built-in server stopped.');
+      return true;
+    }
+
+    if (server.type === 'sse') {
+      const conn = this.sseConnections.get(id);
+      if (conn?.controller) {
+        conn.controller.abort();
+      }
+      this.sseConnections.delete(id);
+      server.status = 'stopped';
+      this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'stopped' });
+      this.appendLog(id, 'info', 'SSE remote connection closed.');
       return true;
     }
 
@@ -455,6 +484,75 @@ class MCPManager {
       return result;
     }
 
+    if (server.type === 'sse') {
+      const conn = this.sseConnections.get(serverId);
+      const postUrl = conn?.postUrl || server.url;
+
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          this.pendingRequests.delete(reqId);
+          const err = new Error(`JSON-RPC request '${method}' timed out after 30000ms`);
+          this.recordTraffic({
+            serverId,
+            serverName: server.name,
+            direction: 'incoming',
+            method,
+            error: { message: err.message },
+            latencyMs: 30000,
+            id: reqId
+          });
+          reject(err);
+        }, 30000);
+
+        this.pendingRequests.set(reqId, {
+          resolve,
+          reject,
+          timer,
+          serverId,
+          serverName: server.name,
+          method,
+          startTime
+        });
+
+        fetch(postUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(server.headers || {})
+          },
+          body: JSON.stringify(rpcPayload)
+        })
+          .then(async (res) => {
+            if (!res.ok) {
+              const errText = await res.text().catch(() => '');
+              throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+            }
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              const body = await res.json().catch(() => null);
+              if (body && (body.result !== undefined || body.error !== undefined)) {
+                this.handleRpcResponse(serverId, body);
+              }
+            }
+          })
+          .catch((err) => {
+            clearTimeout(timer);
+            this.pendingRequests.delete(reqId);
+            this.appendLog(serverId, 'error', `POST request failed (${method}): ${err.message}`);
+            this.recordTraffic({
+              serverId,
+              serverName: server.name,
+              direction: 'incoming',
+              method,
+              error: { message: err.message },
+              latencyMs: Date.now() - startTime,
+              id: reqId
+            });
+            reject(err);
+          });
+      });
+    }
+
     // stdio external server communication
     const child = this.processes.get(serverId);
     if (!child || !child.stdin) {
@@ -533,6 +631,125 @@ class MCPManager {
 
   getTraffic() {
     return this.traffic;
+  }
+
+  async connectSse(id, server, controller) {
+    try {
+      const headers = {
+        'Accept': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        ...(server.headers || {})
+      };
+
+      const res = await fetch(server.url, {
+        headers,
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      this.appendLog(id, 'info', `SSE stream opened. Listening for server messages...`);
+
+      server.status = 'running';
+      server.uptimeStart = Date.now();
+      this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'running', server });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      let currentEvent = 'message';
+      let currentData = '';
+
+      const handleEventBlock = async () => {
+        if (!currentData) return;
+        const text = currentData.trim();
+        const evt = currentEvent;
+        currentData = '';
+        currentEvent = 'message';
+
+        if (evt === 'endpoint') {
+          let postUrl = text;
+          try {
+            postUrl = new URL(text, server.url).toString();
+          } catch {
+            postUrl = text;
+          }
+          const conn = this.sseConnections.get(id);
+          if (conn) {
+            conn.postUrl = postUrl;
+            this.appendLog(id, 'info', `Discovered POST message endpoint: ${postUrl}`);
+
+            // Perform MCP initialize handshake
+            try {
+              await this.sendRpcRequest(id, 'initialize', {
+                protocolVersion: '2024-11-05',
+                capabilities: { roots: { listChanged: true } },
+                clientInfo: { name: 'MCP-Studio', version: '1.0.0' }
+              });
+
+              const toolsResult = await this.sendRpcRequest(id, 'tools/list', {});
+              if (toolsResult?.tools) {
+                server.tools = toolsResult.tools;
+                this.appendLog(id, 'info', `Discovered ${server.tools.length} remote tools via tools/list`);
+                this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'running', server });
+              }
+            } catch (e) {
+              this.appendLog(id, 'warn', `Handshake note: ${e.message}`);
+            }
+          }
+        } else if (evt === 'message') {
+          try {
+            const parsed = JSON.parse(text);
+            this.handleRpcResponse(id, parsed);
+          } catch {
+            this.appendLog(id, 'stdout', `SSE text: ${text}`);
+          }
+        }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed === '') {
+            await handleEventBlock();
+            continue;
+          }
+          if (trimmed.startsWith(':')) {
+            continue;
+          }
+          if (trimmed.startsWith('event:')) {
+            currentEvent = trimmed.slice(6).trim();
+          } else if (trimmed.startsWith('data:')) {
+            const dataSlice = trimmed.slice(5).trim();
+            currentData = currentData ? `${currentData}\n${dataSlice}` : dataSlice;
+          }
+        }
+      }
+
+      this.appendLog(id, 'info', `SSE stream closed by remote server.`);
+      server.status = 'stopped';
+      this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'stopped' });
+    } catch (err) {
+      if (controller.signal.aborted) {
+        this.appendLog(id, 'info', `SSE disconnected.`);
+        return;
+      }
+      this.appendLog(id, 'error', `SSE stream error: ${err.message}`);
+      server.status = 'error';
+      this.broadcast('SERVER_STATUS_CHANGED', { id, status: 'error', error: err.message });
+    } finally {
+      this.sseConnections.delete(id);
+    }
   }
 }
 

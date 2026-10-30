@@ -1,11 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
 import { mcpManager } from './mcpManager.js';
 import { MARKETPLACE_SERVERS } from './marketplaceCatalog.js';
 import { getKnownConfigPaths, readConfig, writeConfig } from './configSync.js';
 import { runAgentLoop } from './agentSimulator.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -210,6 +216,16 @@ app.post('/api/agent/chat', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Serve production static frontend if built
+const distPath = path.resolve(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/ws')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 server.listen(PORT, () => {
   console.log(`\n======================================================`);

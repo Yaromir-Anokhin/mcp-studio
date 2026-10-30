@@ -1,6 +1,7 @@
 import React from 'react';
 import { 
   Zap, 
+  CheckSquare,
   Bot, 
   FolderTree, 
   Activity, 
@@ -34,6 +35,7 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'tools', label: 'Tool Runner', icon: Zap, badge: totalTools > 0 ? `${totalTools}` : null, desc: 'Interactive Postman' },
+    { id: 'suites', label: 'Test Suites & Assertions', icon: CheckSquare, badge: 'CI/CD', desc: 'Postman-style automated tests' },
     { id: 'agent', label: 'AI Playground', icon: Bot, badge: 'New', desc: 'Agent tool execution loop' },
     { id: 'resources', label: 'Resources & Prompts', icon: FolderTree, desc: 'Dynamic templates' },
     { id: 'network', label: 'Network / RPC', icon: Activity, badge: trafficCount > 0 ? `${trafficCount}` : null, desc: 'Live JSON-RPC traffic' },
@@ -120,11 +122,22 @@ export default function Sidebar({
                     isRunning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'
                   }`} />
                   <div className="truncate">
-                    <p className={`font-medium truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                      {srv.name}
-                    </p>
+                    <div className="flex items-center space-x-1.5 truncate">
+                      {srv.type === 'sse' && (
+                        <span className="text-[9px] font-bold px-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
+                          SSE
+                        </span>
+                      )}
+                      <p className={`font-medium truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                        {srv.name}
+                      </p>
+                    </div>
                     <p className="text-[10px] text-slate-400 truncate">
-                      {srv.type === 'builtin' ? 'In-process' : `${srv.command} ${srv.args?.[0] || ''}`}
+                      {srv.type === 'builtin'
+                        ? 'In-process'
+                        : srv.type === 'sse'
+                        ? `${srv.url || 'Remote SSE Stream'}`
+                        : `${srv.command} ${srv.args?.[0] || ''}`}
                     </p>
                   </div>
                 </div>

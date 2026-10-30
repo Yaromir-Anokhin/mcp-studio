@@ -10,6 +10,7 @@ import ConfigSyncModal from './components/ConfigSyncModal';
 import MarketplaceModal from './components/MarketplaceModal';
 import AddServerModal from './components/AddServerModal';
 import SponsorsModal from './components/SponsorsModal';
+import TestSuiteRunner from './components/TestSuiteRunner';
 import { api } from './services/api';
 
 export default function App() {
@@ -196,6 +197,24 @@ export default function App() {
               server={activeServer}
               onCallTool={handleCallTool}
               isLoading={isCallingTool}
+              onSaveToSuite={(scenario) => {
+                const saved = localStorage.getItem('mcp_test_suites');
+                let parsed = [];
+                try { parsed = JSON.parse(saved); } catch {}
+                if (parsed.length > 0) {
+                  parsed[0].scenarios.push(scenario);
+                  localStorage.setItem('mcp_test_suites', JSON.stringify(parsed));
+                }
+                setActiveTab('suites');
+              }}
+            />
+          )}
+
+          {activeTab === 'suites' && (
+            <TestSuiteRunner
+              servers={servers}
+              activeServerId={activeServerId}
+              onCallTool={handleCallTool}
             />
           )}
 
