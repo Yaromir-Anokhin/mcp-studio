@@ -10,15 +10,12 @@
 
 <p align="center">
   <strong>The Visual Postman & DevTools Suite for Anthropic's Model Context Protocol (MCP)</strong><br />
-  Inspect tools, test JSON-RPC in real time, debug stdio servers, and 1-click sync with Claude Desktop and Cursor.
+  Inspect tools, test JSON-RPC in real time, run test assertions, debug stdio & SSE servers, and 1-click sync with Claude Desktop and Cursor.
 </p>
 
 <p align="center">
-  <a href="https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme"><img src="https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612" alt="M8ven Verified" /></a>
+  <img src="docs/images/tool_runner_preview.png" alt="MCP Studio Workbench Preview" width="100%" />
 </p>
-
-[![M8ven Verified](https://m8ven.ai/badge/mcp/yaromir-anokhin-mcp-studio-tjv602?variant=verified&v=887a16068d5754506f6d4296fd5ed612)](https://m8ven.ai/mcp/yaromir-anokhin-mcp-studio-tjv602?s=readme)
-
 
 <p align="center">
   <a href="#-quick-start">Quick Start</a> •
@@ -81,6 +78,10 @@ The **Model Context Protocol (MCP)** is revolutionizing how AI models interact w
 - Define assertions: **Latency thresholds (ms)**, **status checks**, and **response substring / JSON schema matches**.
 - 1-click **Run Suite** with real-time pass/fail scorecards and latency metrics.
 - Export test suites as JSON and generate ready-to-use **GitHub Actions CI/CD workflows**.
+
+<p align="center">
+  <img src="docs/images/test_runner_preview.png" alt="MCP Studio Test Suites & Assertions" width="100%" />
+</p>
 
 ### 8. 📦 Zero-Dependency Built-in Servers
 - Ships with pre-loaded mock servers (`System Diagnostics`, `Filesystem Safe Explorer`, `Web & Search Simulator`).
