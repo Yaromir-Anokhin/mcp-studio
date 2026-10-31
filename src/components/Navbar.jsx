@@ -109,7 +109,7 @@ export default function Navbar({
           <span className="text-[10px] bg-purple-500/40 px-1 rounded text-purple-200">20+</span>
         </button>
 
-        {/* GitHub Stars Button */}
+        {/* GitHub Link */}
         <a
           href="https://github.com/Yaromir-Anokhin/mcp-studio"
           target="_blank"
@@ -117,8 +117,7 @@ export default function Navbar({
           className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 border border-white/10 hover:border-white/20 transition-all"
         >
           <Github className="w-3.5 h-3.5 text-white" />
-          <span className="hidden md:inline font-mono text-[11px]">⭐ Star</span>
-          <span className="text-[10px] bg-slate-800 px-1 rounded text-slate-300 font-mono">5.2k</span>
+          <span className="font-mono text-[11px]">GitHub</span>
         </a>
 
         {/* Sponsor Heart Button */}
